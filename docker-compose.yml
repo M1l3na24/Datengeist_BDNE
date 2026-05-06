@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db_sql:
+    image: postgres:15
+    container_name: sql_server_contenedor
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: cuyos123
+      POSTGRES_DB: datengeist
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_gui
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: angeljza0612@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: cuyos123
+    ports:
+      - "8080:80"
+    depends_on:
+      - db_sql
