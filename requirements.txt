@@ -1,33 +1,8 @@
-# ──────────────────────────────────────────────────────────────────────────────
+# *******************************************************************
 # Datengeist — Proyecto Final BDNE
-# ──────────────────────────────────────────────────────────────────────────────
-# Cómo reproducir el entorno:
-#
-#   1. Crear el ambiente virtual (solo la primera vez):
-#        python3 -m venv venv
-#
-#   2. Activarlo:
-#        source venv/bin/activate          # macOS / Linux
-#        venv\Scripts\activate             # Windows
-#
-#   3. Instalar dependencias:
-#        pip install -r requirements.txt
-#
-#   4. Generar datos y cargar en PostgreSQL (~10 min):
-#        python3 generador.py
-#
-#   5. Ejecutar ETL PostgreSQL → MongoDB (~3 min):
-#        python3 etl.py
-#
-#   6. (Opcional) Generar predicciones de ventas y producción:
-#        python3 predictor.py
-#
-#   7. (Opcional) Abrir notebooks:
-#        pip install jupyter
-#        jupyter lab
-#
+# *******************************************************************
 # Requisito previo: Docker corriendo con docker compose up -d
-# ──────────────────────────────────────────────────────────────────────────────
+# *******************************************************************
 
 # Generación de datos sintéticos
 faker==40.15.0
@@ -43,7 +18,7 @@ psycopg2-binary==2.9.12
 # Conexión a MongoDB
 pymongo==4.17.0
 
-# Machine Learning (predictor.py)
+# ML
 scikit-learn==1.6.1
 
 # Utilidades
