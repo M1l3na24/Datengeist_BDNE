@@ -228,9 +228,9 @@ upsert_collection('clientes_perfil', cli_docs)
 # mezclamos ambos grupos en una sola coleccion donde cada documento tiene un campo tipo
 # que vale "mensual" o "semanal".
 
-print('\n' + '='*60)
+print('\n' + '*-'*30)
 print('  CAPA ORO — KPIs')
-print('='*60)
+print('*-'*30)
 
 monthly = df_v.groupby(['anio','mes','mes_nombre']).agg(
     total_ventas    = ('total', 'sum'),
@@ -306,7 +306,7 @@ upsert_collection('kpi_horarios_afluencia', hora_docs)
 # ORO: kpi_productos_sabores 
 
 # Unimos la tabla de detalle de ventas con el catalogo de productos para tener sabor,
-# categoría y costos. Luego agrupa por producto y calcula: ingresos, costo, margen     
+# categoria y costos. Luego agrupa por producto y calcula: ingresos, costo, margen     
 # bruto, rentabilidad y unidades vendidas. Ordena de mayor a menor ingreso y asigna un
 # ranking_ventas. Alimenta el top 10 de productos y la tabla resumen del dashboard.
 
@@ -344,8 +344,9 @@ upsert_collection('kpi_productos_sabores', prod_kpi_docs)
 
 # ── ORO: kpi_segmentacion 
 # Agrupa ventas por segmento (VIP, Frecuente, Ocasional, Nuevo). Para cada segmento    
-# calcula ingresos, participación porcentual, tickets y clientes únicos. Enriquece con
-# el conteo de clientes y ticket promedio de perfil desde la dimensión de clientes.
+# calcula ingresos, participacion porcentual, tickets y clientes unicos. Enriquece con
+# el conteo de clientes y ticket promedio de perfil desde la dimension de clientes.
+
 seg_kpi = df_v.groupby('cliente_segmento').agg(
     total_ingresos  = ('total',      'sum'),
     num_tickets     = ('id_ticket',  'count'),
@@ -374,8 +375,8 @@ for _, r in seg_kpi.iterrows():
     })
 upsert_collection('kpi_segmentacion', seg_docs)
 
-# ── ORO: kpi_metodos_pago ─────────────────────────────────────────────────────
-# Tasas de comisión estándar mercado mexicano (fuente: Concanaco / bancos 2024)
+# ORO: kpi_metodos_pago 
+# Tasas de comision estandar mercado mexicano
 COMISIONES = {
     'Efectivo':       0.000,
     'Tarjeta débito': 0.015,
@@ -383,6 +384,12 @@ COMISIONES = {
     'Transferencia':  0.000,
     'QR':             0.010,
 }
+
+# Agrupamos por metodo de pago. 
+# Calculamos el monto total, numero de transacciones,
+# participacion porcentual en volumen y en monto. 
+# Incluimos la tasa de comision estandar del mercado mexicano y 
+#el costo total estimado de comisiones por metodo. 
 
 pago_kpi = df_v.groupby('payment_method').agg(
     monto_total       = ('total',     'sum'),
@@ -410,8 +417,13 @@ for _, r in pago_kpi.iterrows():
     })
 upsert_collection('kpi_metodos_pago', pago_docs)
 
-# ── ORO: kpi_mayoreo ─────────────────────────────────────────────────────────
-# Pregunta 1b: ¿Qué productos y con qué frecuencia compran los clientes al por mayor?
+# ORO: kpi_mayoreo 
+
+# Tiene dos tipos de documento: "por_producto" (que productos se venden mas en canal   
+# mayoreo, con unidades, ingresos y margen) y "por_cliente" (top 100 clientes
+# mayoristas ordenados por gasto total, con numero de pedidos y ticket promedio).
+
+# Pregunta 1b: ¿Que productos y con que frecuencia compran los clientes al por mayor?
 mayoreo_det = df_detalle[df_detalle['tipo_venta'] == 'Mayoreo'].copy()
 mayoreo_det['subtotal']    = mayoreo_det['precio_unitario'] * mayoreo_det['cantidad']
 mayoreo_det = mayoreo_det.merge(
@@ -468,11 +480,19 @@ for _, r in por_cliente.head(100).iterrows():
     })
 upsert_collection('kpi_mayoreo', mayoreo_docs)
 
-# ── ORO: kpi_operaciones_personal ────────────────────────────────────────────
-# Pregunta 3b: ¿Cuántos empleados se necesitan en los horarios de mayor afluencia?
+# ORO: kpi_operaciones_personal 
+
+# Definimos uyn documento por cada combinacion fecha-turno. 
+# Guarda numero de empleados, costo por hora, costo total del turno y 
+# el promedio historico de tickets que entran en ese turno. 
+# El campo tickets_por_empleado relaciona directamente la afluencia con la      
+# plantilla disponible.
+
+
+# Pregunta 3b: ¿Cuantos empleados se necesitan en los horarios de mayor afluencia?
 TURNO_HORAS = {'Matutino': (8, 14), 'Vespertino': (14, 20), 'Nocturno': (20, 24)}
 
-# Promedio de tickets por hora en el rango de cada turno (para relacionar afluencia con plantilla)
+# Promedio de tickets por hora en el rango de cada turno (permite relacionar afluencia con plantilla)
 tickets_por_hora = df_v.groupby('hora')['id_ticket'].count().to_dict()
 total_dias = df_v['fecha'].nunique()
 
@@ -496,8 +516,15 @@ for _, r in df_ops.iterrows():
     })
 upsert_collection('kpi_operaciones_personal', ops_docs)
 
-# ── ORO: kpi_ticket_composicion ──────────────────────────────────────────────
-# Pregunta 6a: ¿Cómo luce el ticket promedio?
+# ORO: kpi_ticket_composicion
+
+# Tiene tres tipos de documento: "resumen_global" (ticket promedio, mediana, p25, p75 y
+# maximo), "distribucion_lineas" (que porcentaje de tickets tienen 1, 2, 3...
+# productos) y "por_segmento" (cuantas lineas y unidades trae en promedio cada tipo de 
+# cliente).
+
+
+# Pregunta 6a: ¿Como luce el ticket promedio?
 ticket_size = df_detalle.groupby('id_ticket').agg(
     num_lineas     = ('id_producto', 'count'),
     total_unidades = ('cantidad',    'sum'),
@@ -547,10 +574,10 @@ for _, r in seg_comp.iterrows():
     })
 upsert_collection('kpi_ticket_composicion', comp_docs)
 
-# ── Verificación final ────────────────────────────────────────────────────────
-print('\n' + '='*62)
+# Verificacion final de que todo salio bien
+print('\n' + '*-'*30)
 print('  RESUMEN FINAL — MongoDB')
-print('='*62)
+print('*-'*30)
 colecciones = [
     'ventas_completas','catalogo_productos','clientes_perfil',
     'kpi_ventas_temporales','kpi_horarios_afluencia','kpi_productos_sabores',
@@ -564,4 +591,4 @@ for col in colecciones:
     print('  📦  {:<32} {:>8,} docs'.format(col, n))
 print('-'*62)
 print('  TOTAL  {:>43,} docs'.format(total))
-print('\n✅ ETL completado — MongoDB listo para Metabase')
+print('\n ETL completado — MongoDB')
