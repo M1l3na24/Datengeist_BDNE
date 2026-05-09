@@ -1,0 +1,110 @@
+═══════════════════════════════════════════════════════════════
+  DATENGEIST — SETUP COMPLETO DESDE CERO
+  Ejecutar en orden desde la carpeta del proyecto
+═══════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────
+PASO 1 — Levantar contenedores Docker
+──────────────────────────────────────────────────────────────
+
+docker compose up -d
+
+  Esperar ~30 segundos y verificar que todos estén Up:
+
+docker compose ps
+
+  Servicios esperados:
+    sql_server_contenedor   → puerto 5432
+    pgadmin_gui             → puerto 8080
+    mongodb_datengeist      → puerto 27017
+    mongo-express_ui        → puerto 8081
+    metabase_datengeist     → puerto 3000
+
+──────────────────────────────────────────────────────────────
+PASO 2 — Crear base de datos para Metabase en PostgreSQL
+──────────────────────────────────────────────────────────────
+
+docker exec -it sql_server_contenedor psql -U admin -d datengeist -c "CREATE DATABASE metabase;"
+
+  (Si dice "already exists", ignorarlo)
+
+──────────────────────────────────────────────────────────────
+PASO 3 — Crear tablas en PostgreSQL (esquema SQL)
+──────────────────────────────────────────────────────────────
+
+docker exec -i sql_server_contenedor psql -U admin -d datengeist < datengeist.sql
+
+──────────────────────────────────────────────────────────────
+PASO 4 — Crear colecciones en MongoDB
+──────────────────────────────────────────────────────────────
+
+docker cp crear_colecciones.js mongodb_datengeist:/tmp/crear_colecciones.js
+
+docker exec -it mongodb_datengeist mongosh -u admin -p cuyos123 --authenticationDatabase admin --file /tmp/crear_colecciones.js
+
+  Resultado esperado: 8 líneas con "lista" al final de cada una
+
+──────────────────────────────────────────────────────────────
+PASO 5 — Activar ambiente virtual e instalar dependencias
+──────────────────────────────────────────────────────────────
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+──────────────────────────────────────────────────────────────
+PASO 6 — Generar datos sintéticos y cargar en PostgreSQL
+──────────────────────────────────────────────────────────────
+
+python3 generador.py
+
+  Tiempo estimado: 8–12 minutos
+  Resultado: ~1.2 M tickets, ~120 MB en CSV, cargados en PostgreSQL
+
+──────────────────────────────────────────────────────────────
+PASO 7 — Ejecutar ETL: PostgreSQL → MongoDB
+──────────────────────────────────────────────────────────────
+
+python3 etl.py
+
+  Tiempo estimado: 3–5 minutos
+  Resultado: ~1 GB de datos en 8 colecciones MongoDB
+
+──────────────────────────────────────────────────────────────
+PASO 8 — Abrir interfaces en el navegador
+──────────────────────────────────────────────────────────────
+
+open http://localhost:3000   → Metabase  (dashboard)
+open http://localhost:8080   → pgAdmin   (PostgreSQL)
+open http://localhost:8081   → Mongo Express (MongoDB)
+
+──────────────────────────────────────────────────────────────
+PASO 9 — Conectar MongoDB en Metabase (primera vez)
+──────────────────────────────────────────────────────────────
+
+  En Metabase → Settings → Databases → Add database → MongoDB
+
+  Host:                    mongodb
+  Database name:           datengeist
+  Port:                    27017
+  Username:                admin
+  Password:                cuyos123
+  Authentication database: admin
+  SSL:                     apagado
+
+══════════════════════════════════════════════════════════════
+  COMANDOS ÚTILES
+══════════════════════════════════════════════════════════════
+
+  Apagar contenedores (conserva datos):
+    docker compose stop
+
+  Apagar y borrar todo (datos incluidos):
+    docker compose down -v
+
+  Ver logs de un servicio:
+    docker logs metabase_datengeist
+    docker logs mongodb_datengeist
+
+  Activar venv (cada vez que abras terminal):
+    source venv/bin/activate
