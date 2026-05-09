@@ -1,16 +1,21 @@
-═══════════════════════════════════════════════════════════════
+---------------------------------------------------------------
   DATENGEIST — SETUP COMPLETO DESDE CERO
-  Ejecutar en orden desde la carpeta del proyecto
-  Se asume que ya se tiene clonado el repositorio
-═══════════════════════════════════════════════════════════════
+---------------------------------------------------------------
 
-──────────────────────────────────────────────────────────────
-PASO 1 — Levantar contenedores Docker
-──────────────────────────────────────────────────────────────
+Nuestro objetivo es realizar un proyecto completamente 
+Reproducible. Así que para poder reproducirlo en tu equipo
+de manera local se asume que ya se tiene clonado el repositorio
+e instalado Docker Desktop.
+
+Ejecuta en orden desde la carpeta del proyecto
+
+---------------------------------------------------------------
+PASO 1 — Levanta los contenedores en Docker
+---------------------------------------------------------------
 
 docker compose up -d
 
-  Esperar ~30 segundos y verificar que todos estén Up:
+  Esperar aprox. 30 segundos y verifica que todos estén Up:
 
 docker compose ps
 
@@ -21,23 +26,23 @@ docker compose ps
     mongo-express_ui        → puerto 8081
     metabase_datengeist     → puerto 3000
 
-──────────────────────────────────────────────────────────────
-PASO 2 — Crear base de datos para Metabase en PostgreSQL
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 2 — Crea la base de datos para Metabase en PostgreSQL
+---------------------------------------------------------------
 
 docker exec -it sql_server_contenedor psql -U admin -d datengeist -c "CREATE DATABASE metabase;"
 
-  (Si dice "already exists", ignoramos)
+  (Si dice "already exists", ignoralo)
 
-──────────────────────────────────────────────────────────────
-PASO 3 — Crear tablas en PostgreSQL
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 3 — Crea las tablas en PostgreSQL
+---------------------------------------------------------------
 
 docker exec -i sql_server_contenedor psql -U admin -d datengeist < datengeist.sql
 
-──────────────────────────────────────────────────────────────
-PASO 4 — Crear colecciones en MongoDB
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 4 — Crea las colecciones en MongoDB
+---------------------------------------------------------------
 
 docker cp crear_colecciones.js mongodb_datengeist:/tmp/crear_colecciones.js
 
@@ -45,43 +50,44 @@ docker exec -it mongodb_datengeist mongosh -u admin -p cuyos123 --authentication
 
   Resultado esperado: 8 líneas con "lista" al final de cada una
 
-──────────────────────────────────────────────────────────────
-PASO 5 — Activar ambiente virtual e instalar dependencias
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 5 — Activa el ambiente virtual e instala las dependencias
+---------------------------------------------------------------
 
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-──────────────────────────────────────────────────────────────
-PASO 6 — Generar datos sintéticos y cargar en PostgreSQL
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 6 — Genera los datos sintéticos y carga en PostgreSQL
+---------------------------------------------------------------
 
 python3 generador.py
 
+  NOTA: Tarda bastante, te pedimos paciencia.
   Tiempo estimado: 8–12 minutos
-  Resultado: ~1.2 M tickets, ~120 MB en CSV, cargados en PostgreSQL
+  Resultado: aprox. 1.2 M tickets,  aprox. 120 MB en CSV, cargados en PostgreSQL
 
-──────────────────────────────────────────────────────────────
-PASO 7 — Ejecutar ETL: PostgreSQL → MongoDB
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 7 — Ejecuta el ETL: PostgreSQL → MongoDB
+---------------------------------------------------------------
 
 python3 etl.py
 
   Tiempo estimado: 3–5 minutos
-  Resultado: ~1 GB de datos en 8 colecciones MongoDB
+  Resultado: aprox. 1 GB de datos en 8 colecciones MongoDB
 
-──────────────────────────────────────────────────────────────
-PASO 8 — Abrir interfaces en el navegador
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 8 — Abre interfaces en tu navegador
+---------------------------------------------------------------
 
-open http://localhost:3000   → Metabase  (dashboard)
+open http://localhost:3000   → Metabase  
 open http://localhost:8080   → pgAdmin   (PostgreSQL)
 open http://localhost:8081   → Mongo Express (MongoDB)
 
-──────────────────────────────────────────────────────────────
-PASO 9 — Conectar MongoDB en Metabase (primera vez)
-──────────────────────────────────────────────────────────────
+---------------------------------------------------------------
+PASO 9 — Conecta MongoDB en Metabase (primera vez)
+---------------------------------------------------------------
 
   En Metabase → Settings → Databases → Add database → MongoDB
 
@@ -93,19 +99,21 @@ PASO 9 — Conectar MongoDB en Metabase (primera vez)
   Authentication database: admin
   SSL:                     apagado
 
-══════════════════════════════════════════════════════════════
-  COMANDOS ÚTILES
-══════════════════════════════════════════════════════════════
+---------------------------------------------------------------
+  ALGUNOS COMANDOS ÚTILES QUE TE PUEDEN AYUDAR
+---------------------------------------------------------------
 
-  Apagar contenedores (conserva datos):
+  - Apagar contenedores (conserva datos):
     docker compose stop
 
-  Apagar y borrar todo (datos incluidos):
+  - Apagar y borrar todo (datos incluidos):
     docker compose down -v
 
-  Ver logs de un servicio:
+  - Ver logs de un servicio:
     docker logs metabase_datengeist
     docker logs mongodb_datengeist
 
-SUPER IMPORTANTE: Activa venv cada vez que abras terminal para que evitémoste conflictos en versiones:
+SUPER IMPORTANTE: Activa venv cada vez que abras la terminal para que evites conflictos con versiones:
+
     source venv/bin/activate
+
