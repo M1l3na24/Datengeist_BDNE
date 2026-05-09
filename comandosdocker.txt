@@ -1,3 +1,18 @@
 docker cp crear_colecciones.js mongodb_datengeist:/tmp/crear_colecciones.js
 
 docker exec -it mongodb_datengeist mongosh -u admin -p cuyos123 --authenticationDatabase admin --file /tmp/crear_colecciones.js
+
+docker exec -it sql_server_contenedor psql -U admin -d datengeist -c "CREATE DATABASE metabase;"
+
+Para conectar desde Meta:
+
+| Campo | Valor |
+|---|---|
+| **Nombre para mostrar** | `Datengeist MongoDB` |
+| **Host** | `mongodb` |
+| **Database name** | `datengeist` |
+| **Port** | `27017` |
+| **Username** | `admin` |
+| **Password** | `password123` |
+| **Authentication database** | `admin` |
+| **SSL** | apagado ❌ |
