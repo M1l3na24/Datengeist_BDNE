@@ -1,0 +1,18 @@
+# Datos generados
+csv_output/
+postgres_data/
+
+# Entorno virtual
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
