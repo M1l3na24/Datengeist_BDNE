@@ -1,0 +1,3 @@
+docker cp crear_colecciones.js mongodb_datengeist:/tmp/crear_colecciones.js
+
+docker exec -it mongodb_datengeist mongosh -u admin -p cuyos123 --authenticationDatabase admin --file /tmp/crear_colecciones.js
