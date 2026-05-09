@@ -1,6 +1,6 @@
 # Datengeist — Proyecto Final BDNE
 
-Proyecto final de la materia **Bases de Datos No Estructuradas**. Implementa un pipeline de datos completo para una heladería ficticia ubicada en México, combinando una base de datos relacional (PostgreSQL) con una base de datos documental (MongoDB) y visualización mediante Metabase.
+Proyecto final de la materia **Bases de Datos No Estructuradas**. Implementa un pipeline de datos completo para una heladería ubicada en México (por cuestiones de privacidad no se hace referencia a la empresa) combinando una base de datos relacional (PostgreSQL) con una base de datos documental (MongoDB) y visualización mediante Metabase.
 
 ---
 
@@ -22,15 +22,15 @@ Proyecto final de la materia **Bases de Datos No Estructuradas**. Implementa un 
 generador.py
      │
      ▼
-PostgreSQL (relacional)          datos sintéticos: ~1.2M tickets
+PostgreSQL (relacional)        
      │
      ▼  etl.py  (Bronce → Plata → Oro)
      │
      ▼
-MongoDB (documental)             ~1 GB · 8 colecciones
+MongoDB (documental)           
      │
      ▼
-Metabase Dashboard               5 gráficas · 4 KPIs · 1 tabla · 3 filtros
+Metabase Dashboard              
 ```
 
 ---
@@ -40,7 +40,7 @@ Metabase Dashboard               5 gráficas · 4 KPIs · 1 tabla · 3 filtros
 | Componente | Tecnología |
 |---|---|
 | Base de datos relacional | PostgreSQL 15 |
-| Base de datos documental | MongoDB (latest) |
+| Base de datos documental | MongoDB |
 | ETL / generación de datos | Python 3 · pandas · SQLAlchemy |
 | Visualización | Metabase v0.48.6 |
 | Infraestructura | Docker · Docker Compose |
@@ -115,29 +115,6 @@ El tablero conecta directamente a MongoDB y presenta:
 
 Consulta `comandos_setup.txt` para la guía completa paso a paso. En resumen:
 
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/M1l3na24/Datengeist_BDNE.git
-cd Datengeist_BDNE
-
-# 2. Levantar infraestructura
-docker compose up -d
-
-# 3. Crear ambiente virtual e instalar dependencias
-python3 -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# 4. Generar datos y cargar en PostgreSQL (~10 min)
-python3 generador.py
-
-# 5. Ejecutar ETL hacia MongoDB (~5 min)
-python3 etl.py
-
-# 6. Abrir Metabase
-open http://localhost:3000
-```
-
 ---
 
 ## Servicios y puertos
@@ -145,7 +122,8 @@ open http://localhost:3000
 | Servicio | URL | Credenciales |
 |---|---|---|
 | Metabase | http://localhost:3000 | configurar en primer acceso |
-| pgAdmin | http://localhost:8080 | angeljza0612@gmail.com / cuyos123 |
+| pgAdmin | http://localhost:8080 | correo de angel / cuyos123 |
 | Mongo Express | http://localhost:8081 | — |
 | PostgreSQL | localhost:5432 | admin / cuyos123 · db: datengeist |
 | MongoDB | localhost:27017 | admin / cuyos123 |
+
