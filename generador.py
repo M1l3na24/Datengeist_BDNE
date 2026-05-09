@@ -11,9 +11,9 @@ import pandas as pd
 import numpy as np
 from faker import Faker
 from tqdm import tqdm
-import random, math, os
+import random, math, os, shutil
 from datetime import date, timedelta, datetime
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 SEED       = 42
 FECHA_INI  = date(2021, 1, 1)   # ← cambiado (era 2023)
@@ -25,7 +25,11 @@ random.seed(SEED)
 np.random.seed(SEED)
 fake = Faker('es_MX')
 Faker.seed(SEED)
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Limpia el directorio de salida para evitar duplicados en re-ejecuciones
+if os.path.exists(OUTPUT_DIR):
+    shutil.rmtree(OUTPUT_DIR)
+os.makedirs(OUTPUT_DIR)
 fechas = pd.date_range(FECHA_INI, FECHA_FIN, freq='D')
 
 # ── Helpers de estacionalidad ────────────────────────────────────────────────
@@ -172,6 +176,7 @@ suma_h = sum(horas_prob_raw)
 horas_prob = [p/suma_h for p in horas_prob_raw]
 
 ventas_rows, detalle_rows, ticket_id = [], [], 1
+ventas_primera, detalle_primera = True, True
 
 for f in tqdm(fechas):
     fdate      = f.date()
@@ -208,20 +213,22 @@ for f in tqdm(fechas):
         ticket_id += 1
 
     if len(ventas_rows) >= 90_000:
-        v_hdr = not os.path.exists(f'{OUTPUT_DIR}/Ventas.csv') or os.path.getsize(f'{OUTPUT_DIR}/Ventas.csv')==0
-        pd.DataFrame(ventas_rows).to_csv(f'{OUTPUT_DIR}/Ventas.csv', mode='a', index=False, header=v_hdr)
+        pd.DataFrame(ventas_rows).to_csv(f'{OUTPUT_DIR}/Ventas.csv',
+            mode='w' if ventas_primera else 'a', index=False, header=ventas_primera)
+        ventas_primera = False
         ventas_rows = []
     if len(detalle_rows) >= 250_000:
-        d_hdr = not os.path.exists(f'{OUTPUT_DIR}/Detalle_ventas.csv') or os.path.getsize(f'{OUTPUT_DIR}/Detalle_ventas.csv')==0
-        pd.DataFrame(detalle_rows).to_csv(f'{OUTPUT_DIR}/Detalle_ventas.csv', mode='a', index=False, header=d_hdr)
+        pd.DataFrame(detalle_rows).to_csv(f'{OUTPUT_DIR}/Detalle_ventas.csv',
+            mode='w' if detalle_primera else 'a', index=False, header=detalle_primera)
+        detalle_primera = False
         detalle_rows = []
 
 if ventas_rows:
-    v_hdr = not os.path.exists(f'{OUTPUT_DIR}/Ventas.csv') or os.path.getsize(f'{OUTPUT_DIR}/Ventas.csv')==0
-    pd.DataFrame(ventas_rows).to_csv(f'{OUTPUT_DIR}/Ventas.csv', mode='a', index=False, header=v_hdr)
+    pd.DataFrame(ventas_rows).to_csv(f'{OUTPUT_DIR}/Ventas.csv',
+        mode='w' if ventas_primera else 'a', index=False, header=ventas_primera)
 if detalle_rows:
-    d_hdr = not os.path.exists(f'{OUTPUT_DIR}/Detalle_ventas.csv') or os.path.getsize(f'{OUTPUT_DIR}/Detalle_ventas.csv')==0
-    pd.DataFrame(detalle_rows).to_csv(f'{OUTPUT_DIR}/Detalle_ventas.csv', mode='a', index=False, header=d_hdr)
+    pd.DataFrame(detalle_rows).to_csv(f'{OUTPUT_DIR}/Detalle_ventas.csv',
+        mode='w' if detalle_primera else 'a', index=False, header=detalle_primera)
 
 n_tickets_total = ticket_id - 1
 print(f'   ✅ {n_tickets_total:,} tickets → Ventas.csv + Detalle_ventas.csv')
@@ -269,8 +276,15 @@ print('\n  Siguiente paso: python3 etl.py')
 
 # ── Carga a PostgreSQL ────────────────────────────────────────────────────────
 print('\n⏳ Cargando CSVs en PostgreSQL...')
-PG_CONN = 'postgresql+psycopg2://admin:cuyos123@localhost:5432/datengeist'
+PG_CONN = 'postgresql+psycopg2://admin:cuyos123@127.0.0.1:5433/datengeist'
 engine  = create_engine(PG_CONN)
+
+# Truncar en orden seguro (FK: detalle_ventas → ventas → dims)
+with engine.begin() as conn:
+    conn.execute(text(
+        'TRUNCATE TABLE detalle_ventas, ventas, operaciones_y_personal, '
+        'variables_externas, dim_clientes_y_segmentos, dim_productos_y_sabores CASCADE'
+    ))
 
 TABLAS = [
     (f'{OUTPUT_DIR}/Variables_Externas.csv',       'variables_externas'),

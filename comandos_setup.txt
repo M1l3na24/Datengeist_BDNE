@@ -1,6 +1,7 @@
 ═══════════════════════════════════════════════════════════════
   DATENGEIST — SETUP COMPLETO DESDE CERO
   Ejecutar en orden desde la carpeta del proyecto
+  Se asume que ya se tiene clonado el repositorio
 ═══════════════════════════════════════════════════════════════
 
 ──────────────────────────────────────────────────────────────
@@ -26,10 +27,10 @@ PASO 2 — Crear base de datos para Metabase en PostgreSQL
 
 docker exec -it sql_server_contenedor psql -U admin -d datengeist -c "CREATE DATABASE metabase;"
 
-  (Si dice "already exists", ignorarlo)
+  (Si dice "already exists", ignoramos)
 
 ──────────────────────────────────────────────────────────────
-PASO 3 — Crear tablas en PostgreSQL (esquema SQL)
+PASO 3 — Crear tablas en PostgreSQL
 ──────────────────────────────────────────────────────────────
 
 docker exec -i sql_server_contenedor psql -U admin -d datengeist < datengeist.sql
@@ -106,5 +107,5 @@ PASO 9 — Conectar MongoDB en Metabase (primera vez)
     docker logs metabase_datengeist
     docker logs mongodb_datengeist
 
-  Activar venv (cada vez que abras terminal):
+SUPER IMPORTANTE: Activa venv cada vez que abras terminal para que evitémoste conflictos en versiones:
     source venv/bin/activate

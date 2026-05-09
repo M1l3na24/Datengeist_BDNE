@@ -1,4 +1,6 @@
--- 1. Catálogo de Productos y Sabores
+-- En este archivo creamos el esquema de la base de datos relacional
+
+-- 1. Productos y Sabores
 CREATE TABLE Dim_Productos_y_Sabores (
     ID_Producto INT PRIMARY KEY,
     Categoria VARCHAR(50),
@@ -7,7 +9,7 @@ CREATE TABLE Dim_Productos_y_Sabores (
     ingredientes TEXT
 );
 
--- 2. Catálogo de Clientes y Segmentos
+-- 2. Clientes y Segmentos
 CREATE TABLE Dim_Clientes_y_Segmentos (
     ID_Cliente INT PRIMARY KEY,
     Nombre VARCHAR(100),
@@ -19,7 +21,7 @@ CREATE TABLE Dim_Clientes_y_Segmentos (
     ubicacion VARCHAR(255)
 );
 
--- 3. Tabla de Ventas (Encabezado)
+-- 3. Tabla de Ventas
 CREATE TABLE Ventas (
     ID_Ticket INT PRIMARY KEY,
     Timestamp TIMESTAMP,
@@ -28,11 +30,11 @@ CREATE TABLE Ventas (
     total DECIMAL(10,2)
 );
 
--- 4. Detalle de Ventas (Relacional)
+-- 4. Detalle de Ventas 
 CREATE TABLE Detalle_ventas (
     ID_Ticket INT REFERENCES Ventas(ID_Ticket),
     ID_Producto INT REFERENCES Dim_Productos_y_Sabores(ID_Producto),
-    ID_Sabor INT, -- Podrías crear una dim aparte para sabores si es necesario
+    ID_Sabor INT, 
     Cantidad INT,
     Precio_Unitario DECIMAL(10,2),
     Tipo_Venta VARCHAR(50),
@@ -49,7 +51,7 @@ CREATE TABLE Operaciones_y_Personal (
     PRIMARY KEY (Fecha, Turno)
 );
 
--- 6. Variables Externas (Muy útil para el análisis de helados)
+-- 6. Variables Externas
 CREATE TABLE Variables_Externas (
     Fecha DATE PRIMARY KEY,
     Temperatura DECIMAL(5,2),

@@ -19,7 +19,10 @@
 #   5. Ejecutar ETL PostgreSQL → MongoDB (~3 min):
 #        python3 etl.py
 #
-#   6. (Opcional) Abrir notebooks:
+#   6. (Opcional) Generar predicciones de ventas y producción:
+#        python3 predictor.py
+#
+#   7. (Opcional) Abrir notebooks:
 #        pip install jupyter
 #        jupyter lab
 #
@@ -39,6 +42,9 @@ psycopg2-binary==2.9.12
 
 # Conexión a MongoDB
 pymongo==4.17.0
+
+# Machine Learning (predictor.py)
+scikit-learn==1.6.1
 
 # Utilidades
 tqdm==4.67.3
