@@ -33,8 +33,8 @@ DIAS      = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo
 MESES_NOM = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-# La siguiente funcion garantiza cada vez que corras el ETL partas desde cero, sin duplicados
-# e inserta los nuevos
+# La siguiente funcion garantiza que cada vez que corramos el ETL partamos
+# desde cero, sin duplicados e inserta los nuevos
 def upsert_collection(name, docs):
     coll = mongo[name]
     coll.delete_many({})
@@ -77,7 +77,7 @@ df_productos['sabor'] = df_productos['id_producto'].apply(
     lambda x: SABORES[(int(x) - 1) // 5]
 )
 
-# Prcentaje de rentabilidad de cada producto:
+# Porcentaje de rentabilidad de cada producto:
 #   rentabilidad = (precio - costo) / precio
 
 df_productos['rentabilidad_pct'] = (
@@ -108,7 +108,7 @@ df_v['hora']       = df_v['timestamp'].dt.hour.astype(int)
 # MONGO NO tiene Joins
 # Asi que hacemos join con clientes , es decir agregamos
 # los datos del cliente (segmento, giro, ticket promedio,
-#  etc.) directamente en cada venta
+# etc.) directamente en cada venta
 cli = df_clientes[['id_cliente','nombre','segmento','giro',
                     'ticket_prom','sabor_preferido','frecuencia_compra','ubicacion']].copy()
 cli.columns = ['id_cliente','cliente_nombre','cliente_segmento','cliente_giro',
@@ -272,7 +272,14 @@ for _, r in weekly.iterrows():
 
 upsert_collection('kpi_ventas_temporales', monthly_docs + weekly_docs)
 
-# ── ORO: kpi_horarios_afluencia ───────────────────────────────────────────────
+# ORO: kpi_horarios_afluencia 
+
+# Agrupamos por combinacion de hora del dia + dia de la semana. 
+# Calculamos el promedio de tickets por hora dividiendo el total entre 
+# los dias distintos que existieron para ese dia de semana. Luego clasifica 
+# cada hora como "Hora pico", "Hora normal" o "Hora baja" usando los percentiles 
+# 75 y 50 como umbrales.
+
 hora_agg = df_v.groupby(['hora','dia_semana','dia_nombre']).agg(
     total_tickets  = ('id_ticket', 'count'),
     total_ingresos = ('total', 'sum'),
@@ -296,7 +303,13 @@ for _, r in hora_agg.iterrows():
     })
 upsert_collection('kpi_horarios_afluencia', hora_docs)
 
-# ── ORO: kpi_productos_sabores ────────────────────────────────────────────────
+# ORO: kpi_productos_sabores 
+
+# Unimos la tabla de detalle de ventas con el catalogo de productos para tener sabor,
+# categoría y costos. Luego agrupa por producto y calcula: ingresos, costo, margen     
+# bruto, rentabilidad y unidades vendidas. Ordena de mayor a menor ingreso y asigna un
+# ranking_ventas. Alimenta el top 10 de productos y la tabla resumen del dashboard.
+
 det_prod = df_detalle.merge(
     df_productos[['id_producto','sabor','categoria','costo_prod_lt','precio_sug']],
     on='id_producto', how='left',
@@ -329,7 +342,10 @@ for _, r in prod_kpi.iterrows():
     })
 upsert_collection('kpi_productos_sabores', prod_kpi_docs)
 
-# ── ORO: kpi_segmentacion ─────────────────────────────────────────────────────
+# ── ORO: kpi_segmentacion 
+# Agrupa ventas por segmento (VIP, Frecuente, Ocasional, Nuevo). Para cada segmento    
+# calcula ingresos, participación porcentual, tickets y clientes únicos. Enriquece con
+# el conteo de clientes y ticket promedio de perfil desde la dimensión de clientes.
 seg_kpi = df_v.groupby('cliente_segmento').agg(
     total_ingresos  = ('total',      'sum'),
     num_tickets     = ('id_ticket',  'count'),
