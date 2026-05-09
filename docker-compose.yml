@@ -22,8 +22,11 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: angeljza0612@gmail.com
       PGADMIN_DEFAULT_PASSWORD: cuyos123
+      PGADMIN_CONFIG_SERVER_MODE: 'False' 
     ports:
       - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin  
     depends_on:
       - db_sql
 
@@ -74,3 +77,4 @@ services:
 volumes:
   mongo_data:
   metabase_data:
+  pgadmin_data:
