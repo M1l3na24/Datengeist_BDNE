@@ -67,25 +67,23 @@ for name, df in [
     ('dim_productos_y_sabores',  df_productos),
     ('dim_clientes_y_segmentos', df_clientes),
     ('variables_externas',       df_clima),
-    ('operaciones_y_personal',   df_ops),
+    ('operaciones_y_personal',   df_ops)
 ]:
     print(' {:<28} {:>10,} filas'.format(name, len(df)))
 
 
 # Es necesario reconstruir el sabor que no estaba guardado como columna en PostgreSQL
 df_productos['sabor'] = df_productos['id_producto'].apply(
-    lambda x: SABORES[(int(x) - 1) // 5]
-)
+    lambda x: SABORES[(int(x) - 1) // 5])
 
 # Porcentaje de rentabilidad de cada producto:
 #   rentabilidad = (precio - costo) / precio
 
 df_productos['rentabilidad_pct'] = (
     (df_productos['precio_sug'] - df_productos['costo_prod_lt'])
-    / df_productos['precio_sug']
-).round(4)
+    / df_productos['precio_sug']).round(4)
 
-print('\n Extracción completa')
+print('\n Extracción completada :)')
 
 # PLATA: ventas_completas
 print('\n' + '*-'*30)
@@ -216,7 +214,7 @@ for _, row in df_cp.iterrows():
             'ticket_real':   round(float(row['ticket_real']) if pd.notna(row.get('ticket_real')) else 0.0, 2),
             'ultimo_pedido': row['ultimo_pedido'].to_pydatetime() if pd.notna(row.get('ultimo_pedido')) else None,
             'primer_pedido': row['primer_pedido'].to_pydatetime() if pd.notna(row.get('primer_pedido')) else None,
-        },
+        }
     })
 upsert_collection('clientes_perfil', cli_docs)
 
@@ -342,7 +340,8 @@ for _, r in prod_kpi.iterrows():
     })
 upsert_collection('kpi_productos_sabores', prod_kpi_docs)
 
-# ── ORO: kpi_segmentacion 
+# ORO: kpi_segmentacion 
+
 # Agrupa ventas por segmento (VIP, Frecuente, Ocasional, Nuevo). Para cada segmento    
 # calcula ingresos, participacion porcentual, tickets y clientes unicos. Enriquece con
 # el conteo de clientes y ticket promedio de perfil desde la dimension de clientes.
@@ -376,6 +375,7 @@ for _, r in seg_kpi.iterrows():
 upsert_collection('kpi_segmentacion', seg_docs)
 
 # ORO: kpi_metodos_pago 
+
 # Tasas de comision estandar mercado mexicano
 COMISIONES = {
     'Efectivo':       0.000,
@@ -482,17 +482,16 @@ upsert_collection('kpi_mayoreo', mayoreo_docs)
 
 # ORO: kpi_operaciones_personal 
 
-# Definimos uyn documento por cada combinacion fecha-turno. 
+# Definimos un documento por cada combinacion fecha-turno. 
 # Guarda numero de empleados, costo por hora, costo total del turno y 
 # el promedio historico de tickets que entran en ese turno. 
 # El campo tickets_por_empleado relaciona directamente la afluencia con la      
 # plantilla disponible.
 
-
 # Pregunta 3b: ¿Cuantos empleados se necesitan en los horarios de mayor afluencia?
 TURNO_HORAS = {'Matutino': (8, 14), 'Vespertino': (14, 20), 'Nocturno': (20, 24)}
 
-# Promedio de tickets por hora en el rango de cada turno (permite relacionar afluencia con plantilla)
+# Promedio de tickets por hora en el rango de cada turno
 tickets_por_hora = df_v.groupby('hora')['id_ticket'].count().to_dict()
 total_dias = df_v['fecha'].nunique()
 
@@ -519,10 +518,9 @@ upsert_collection('kpi_operaciones_personal', ops_docs)
 # ORO: kpi_ticket_composicion
 
 # Tiene tres tipos de documento: "resumen_global" (ticket promedio, mediana, p25, p75 y
-# maximo), "distribucion_lineas" (que porcentaje de tickets tienen 1, 2, 3...
+# maximo), "distribucion_lineas" (que porcentaje de tickets tienen 1, 2, 3, ...
 # productos) y "por_segmento" (cuantas lineas y unidades trae en promedio cada tipo de 
 # cliente).
-
 
 # Pregunta 6a: ¿Como luce el ticket promedio?
 ticket_size = df_detalle.groupby('id_ticket').agg(
