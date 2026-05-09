@@ -58,6 +58,10 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
+NOTA: Si por alguna razón falla la instalación de scikit-learn intenta lo siguiente:
+
+  Modifica scikit-learn>=1.3.0 y vuelve a correr pip install -r requirements.txt
+
 ---------------------------------------------------------------
 PASO 6 — Genera los datos sintéticos y carga en PostgreSQL
 ---------------------------------------------------------------
