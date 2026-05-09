@@ -56,3 +56,45 @@ CREATE TABLE Variables_Externas (
     Precipitacion DECIMAL(5,2),
     Eventos_Festivos_Locales TEXT
 );
+
+-- Para ver tablas
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+AND table_type = 'BASE TABLE';
+
+-- Para ver info
+SELECT
+    v.id_ticket,
+    v.timestamp,
+    v.total,
+    v.payment_method,
+
+    -- Cliente
+    c.nombre,
+    c.segmento,
+    c.giro,
+    c.ubicacion,
+
+    -- Detalle
+    d.cantidad,
+    d.precio_unitario,
+    d.tipo_venta,
+
+    -- Producto
+    p.categoria,
+    p.precio_sug,
+    p.ingredientes,
+
+    -- Clima del día
+    ve.temperatura,
+    ve.precipitacion,
+    ve.eventos_festivos_locales
+
+FROM ventas v
+    JOIN dim_clientes_y_segmentos c  ON v.id_cliente  = c.id_cliente
+    JOIN detalle_ventas d            ON v.id_ticket   = d.id_ticket
+    JOIN dim_productos_y_sabores p   ON d.id_producto = p.id_producto
+    JOIN variables_externas ve       ON v.timestamp::date = ve.fecha
+
+LIMIT 100;
