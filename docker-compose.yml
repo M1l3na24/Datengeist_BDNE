@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # --- SECCIÓN POSTGRES ---
+  # --- POSTGRES ---
   db_sql:
     image: postgres:15
     container_name: sql_server_contenedor
@@ -27,7 +27,7 @@ services:
     depends_on:
       - db_sql
 
-  # --- SECCIÓN MONGODB ---
+  # --- MONGODB ---
   mongodb:
     image: mongo:latest
     container_name: mongodb_datengeist
@@ -51,7 +51,7 @@ services:
     depends_on:
       - mongodb
 
-  # --- SECCIÓN METABASE ---
+  # --- METABASE ---
   metabase:
     image: metabase/metabase:v0.48.6
     container_name: metabase_datengeist
