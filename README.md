@@ -2,6 +2,12 @@
 
 Proyecto final de la materia **Bases de Datos No Estructuradas**. Implementa un pipeline de datos completo para una heladería ubicada en México (por cuestiones de privacidad no se hace referencia a la empresa) combinando una base de datos relacional (PostgreSQL) con una base de datos documental (MongoDB) y visualización mediante Metabase.
 
+Participantes:
+* Ángel N. Pérez
+* Ángel J. Zamora
+* Isaac Monroy
+* Milena F. Rivera
+* Valentina A. Cruz
 ---
 
 ## Descripción del proyecto
@@ -26,6 +32,8 @@ PostgreSQL (relacional)
      │
      ▼  etl.py  (Bronce → Plata → Oro)
      │
+     ▼  predictor.py (Logistic Regression)
+     │
      ▼
 MongoDB (documental)           
      │
@@ -41,7 +49,7 @@ Metabase Dashboard
 |---|---|
 | Base de datos relacional | PostgreSQL 15 |
 | Base de datos documental | MongoDB |
-| ETL / generación de datos | Python 3 · pandas · SQLAlchemy |
+| ETL / generación de datos | Python 3 · pandas · SQLAlchemy · ScikitLearn |
 | Visualización | Metabase v0.48.6 |
 | Infraestructura | Docker · Docker Compose |
 | Interfaz PostgreSQL | pgAdmin 4 |
@@ -58,6 +66,8 @@ Datengeist_BDNE/
 ├── crear_colecciones.js      # Colecciones e índices MongoDB (8 colecciones)
 ├── generador.py              # Generador de datos sintéticos → carga PostgreSQL
 ├── etl.py                    # Pipeline ETL: PostgreSQL → MongoDB
+├── predictor.py              # Análisis predictivo y proyección de ventas
+├── Graficas_Tablero.txt      # Consultas utilizadas para llevar información al Dash
 ├── requirements.txt          # Dependencias Python del proyecto
 └── comandos_setup.txt        # Guía de setup paso a paso
 ```
@@ -89,6 +99,8 @@ Datengeist_BDNE/
 | Oro | `kpi_productos_sabores` | Ranking de productos por ingresos y margen |
 | Oro | `kpi_segmentacion` | Ingresos y participación por segmento de cliente |
 | Oro | `kpi_metodos_pago` | Distribución de métodos de pago |
+|Predictivo| `predicciones_produccion` | Viabilidad de producción a dia inmediato |
+|Predictivo| `predicciones_ventas` | Predicción de rentabilidad y tickets |
 
 ---
 
