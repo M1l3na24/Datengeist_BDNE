@@ -586,7 +586,7 @@ total = 0
 for col in colecciones:
     n = mongo[col].count_documents({})
     total += n
-    print('  📦  {:<32} {:>8,} docs'.format(col, n))
+    print('    {:<32} {:>8,} docs'.format(col, n))
 print('-'*62)
 print('  TOTAL  {:>43,} docs'.format(total))
 print('\n ETL completado — MongoDB')
