@@ -108,10 +108,10 @@ Datengeist_BDNE/
 
 El tablero conecta directamente a MongoDB y presenta:
 
-- **4 Indicadores clave (Highlights):** total de ingresos, ticket promedio, total de transacciones, margen bruto
-- **5 Gráficas:** tendencia mensual (líneas), tendencia semanal (líneas), top 10 productos (barras), ingresos por segmento (barras), afluencia por hora (barras)
-- **1 Tabla resumen:** detalle completo por producto con ranking, ingresos y rentabilidad
-- **3 Variables de filtro:** año (2021–2024), segmento de cliente, mes
+- **4 Indicadores clave (Highlights):** Máximo tickets proyectados, Ventas estimadas para el próximo mes, Tickets semana actual, Total Clientes, Ticket Promedio, Ventas Semana Actual
+- **5 Gráficas:** Predicciones de Venta, Plan de Producción por sabor, Predicciones Tickets, Ventas Diarias Estimadas, Segmentación Clientes, Análisis Personal, Rentabilidad, Análisis Temporal, Ventas por Mayoreo, Categoría y Sabor, y Análisis de Tickets.
+- **1 Tabla resumen:** Producción sugerida para hoy
+- **3 Variables de filtro:** año (2021–2024), segmento de cliente, turno de los empleados
 
 ---
 
@@ -125,7 +125,7 @@ El tablero conecta directamente a MongoDB y presenta:
 
 ## Setup
 
-Consulta `comandos_setup.txt` para la guía completa paso a paso. En resumen:
+Consulta `comandos_setup.txt` para la guía completa paso a paso. 
 
 ---
 
