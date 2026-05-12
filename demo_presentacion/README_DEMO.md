@@ -115,7 +115,7 @@ por colección.
 
 ---
 
-### 4. Inyectar ventas en vivo (presentación)
+### 4. Inyectar ventas en vivo
 
 ```bash
 # Corre el ETL después de cada venta
